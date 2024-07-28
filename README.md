@@ -41,7 +41,15 @@ GRANT ALL PRIVILEGES ON DATABASE keycloaktest TO developer;
 3. Create OAuth 2.0 credentials and note the Client ID and Client Secret.
 ![alt text](assets/Screenshot_২০২৪০৭২৭_০২৪৭৫১.png)
 
-## Keycloak Identity Provider Configuration
+## Step 4: Set Up Facebook Identity Provider
+
+1. Go to the Facebook Developer Console and create a new project from this uri : https://developers.facebook.com/apps.
+2. Navigate to permissions and add email permissions.
+![alt text](assets/Screenshot_২০২৪০৭২৮_২০০৭১৫.png)
+3. Go to app settings and note the Client ID and Client Secret.
+![alt text](assets/Screenshot_২০২৪০৭২৮_২০১৬২৫.png)
+
+## Keycloak Google Identity Provider Configuration
 
 1. In Keycloak, go to the Identity Providers tab and select Google.
 2. Enter the Client ID and Client Secret from Google.
@@ -49,6 +57,15 @@ GRANT ALL PRIVILEGES ON DATABASE keycloaktest TO developer;
 4. Client ID: Your Google Client ID
 5. Client Secret: Your Google Client Secret
 ![alt text](assets/Screenshot_২০২৪০৭২৭_০২৫৯০৩.png)
+
+## Keycloak Facebook Identity Provider Configuration
+
+1. In Keycloak, go to the Identity Providers tab and select Facebook.
+2. Enter the Client ID and Client Secret from Facebook.
+3. Set the Redirect URI to http://localhost:8080/realms/{realm-name}/broker/facebook/endpoint.
+4. Client ID: Your Facebook Client ID
+5. Client Secret: Your Facebook Client Secret
+![alt text](assets/Screenshot_২০২৪০৭২৮_২০২৯৪২.png)
 
 ## Access your Keycloak account
 
@@ -195,3 +212,65 @@ const LogoutButton = () => {
 
 export default LogoutButton;
 ```
+
+## Create User with Keycloak Admin REST API
+
+This guide will walk you through the steps to create a user in Keycloak using the Admin REST API.
+
+### Prerequisites
+
+- `admin-cli` client under the targeted realms configured with:
+  - Client authentication enabled
+  - Direct access grants enabled
+  - Service accounts roles enabled
+  ![alt text](./assets/Screenshot_২০২৪০৭২৯_০৩০৭৪৭.png)
+  - `manage-users` role assigned to the service account roles
+  ![alt text](./assets/Screenshot_২০২৪০৭২৯_০৩১৮৫১.png)
+
+### Steps
+
+#### 1. Obtain an Access Token
+
+First, you need to obtain an access token using the `admin-cli` client.
+
+```sh
+curl --location 'http://localhost:8080/realms/max-live-test/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=client_credentials' \
+--data-urlencode 'client_id=admin-cli' \
+--data-urlencode 'client_secret=<client_secret>'
+```
+
+Replace <client_secret> with the secret copied from the admin-cli client configuration.
+
+#### 2. Create a User
+
+Use the obtained access token to create a new user.
+
+```bash
+curl --location 'http://localhost:8080/admin/realms/max-live-test/users' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <access_token>' \
+--data-raw '{
+    "username": "newuser",
+    "enabled": true,
+    "firstName": "First",
+    "lastName": "Last",
+    "email": "newuser@example.com",
+    "credentials": [
+        {
+            "type": "password",
+            "value": "new_password",
+            "temporary": false
+        }
+    ]
+}'
+```
+
+Replace <access_token> with the token obtained in the previous step.
+
+### Notes
+
+* Ensure that the admin-cli client is properly configured under the max-live-test realm.
+* The client_secret should be securely stored and not exposed in public repositories.
+* The manage-users role must be assigned to the service account of the admin-cli client to allow user creation.
