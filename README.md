@@ -274,3 +274,9 @@ Replace <access_token> with the token obtained in the previous step.
 * Ensure that the admin-cli client is properly configured under the max-live-test realm.
 * The client_secret should be securely stored and not exposed in public repositories.
 * The manage-users role must be assigned to the service account of the admin-cli client to allow user creation.
+
+## Run keycloak with custom port and host
+
+```bash
+nohup bin/kc.sh start-dev --db postgres --db-url jdbc:postgresql://localhost:5432/keycloak --db-username developer --db-password developer --http-port=9999 --hostname https://domain.com --http-enabled true  &
+```
