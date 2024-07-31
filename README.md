@@ -280,3 +280,72 @@ Replace <access_token> with the token obtained in the previous step.
 ```bash
 nohup bin/kc.sh start-dev --db postgres --db-url jdbc:postgresql://localhost:5432/keycloak --db-username developer --db-password developer --http-port=9999 --hostname https://domain.com --http-enabled true  &
 ```
+
+## PKCE with Keycloak
+
+This guide demonstrates how to use Proof Key for Code Exchange (PKCE) with Keycloak for secure authentication.
+
+### Prerequisites
+
+- Keycloak server running at `http://localhost:8080`
+- A Keycloak realm named `max-live-test`
+- A Keycloak client named `max-live-web` with PKCE enabled
+- A web application running at `http://localhost:3000`
+
+### Steps
+
+### 1. Initiate Authorization Request
+
+Open the following URL in your browser to initiate the authorization request:
+
+```url
+http://localhost:8080/realms/max-live-test/protocol/openid-connect/auth?client_id=max-live-web&response_type=code&redirect_uri=http://localhost:3000/&code_challenge=nQDk-cypszC9_2vzo6PLZ8tER1y1_CKx61sw7OU8xcg&code_challenge_method=S256
+```
+
+
+### 2. Handle Redirect
+
+After successful authentication, you will be redirected to:
+
+  ```url
+  http://localhost:3000/?session_state=f4860643-2eaa-4aaf-b646-6c6a40729bc6&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Fmax-live-test&code=04be86a6-9151-4694-886f-b8baf80ef157.f4860643-2eaa-4aaf-b646-6c6a40729bc6.1d18ae8d-5fa9-4f40-8c6e-8d1163bab88f
+  ```
+
+
+### 2. Handle Redirect
+
+After successful authentication, you will be redirected to:
+
+  ```url
+  http://localhost:3000/?session_state=f4860643-2eaa-4aaf-b646-6c6a40729bc6&iss=http%3A%2F%2Flocalhost%3A8080%2Frealms%2Fmax-live-test&code=04be86a6-9151-4694-886f-b8baf80ef157.f4860643-2eaa-4aaf-b646-6c6a40729bc6.1d18ae8d-5fa9-4f40-8c6e-8d1163bab88f
+  ```
+
+### 3. Exchange Authorization Code for Tokens
+
+Use the following `curl` command to exchange the authorization code for tokens:
+
+  ```sh
+  curl --location 'http://localhost:8080/realms/max-live-test/protocol/openid-connect/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=authorization_code' \
+  --data-urlencode 'client_id=max-live-web' \
+  --data-urlencode 'code=04be86a6-9151-4694-886f-b8baf80ef157.f4860643-2eaa-4aaf-b646-6c6a40729bc6.1d18ae8d-5fa9-4f40-8c6e-8d1163bab88f' \
+  --data-urlencode 'redirect_uri=http://localhost:3000/' \
+  --data-urlencode 'code_verifier=A379jc08Iowoj29RoEzmqwJYt2AJueokhMdCBAELhPzTLGof68-YAgfzjR0hh3NjdsKcMatPn6XaZrhCWkIh2w'
+  ```
+
+4. Receive Access Token
+
+  ```json
+    {
+    "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpMHhMcHpJcUw3T1FRb2xmZVVkZDRaZC0zY0dwelFWa28zd2dLdHBqWlhNIn0.eyJleHAiOjE3MjIzNzAyOTYsImlhdCI6MTcyMjM2OTk5NiwiYXV0aF90aW1lIjoxNzIyMzY5OTYwLCJqdGkiOiJiNmExMzE2OC0zZjRiLTQzNWYtODk1Zi04MWQ3Njk5YzQzMmUiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvcmVhbG1zL21heC1saXZlLXRlc3QiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZDA3MDIxZTktMWFkNC00NmVlLWE0ZmMtMGM1YzAwODQ0Yzk0IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoibWF4LWxpdmUtd2ViIiwic2lkIjoiZjQ4NjA2NDMtMmVhYS00YWFmLWI2NDYtNmM2YTQwNzI5YmM2IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjMwMDAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLW1heC1saXZlLXRlc3QiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJGaXJzdCBMYXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibmV3dXNlciIsImdpdmVuX25hbWUiOiJGaXJzdCIsImZhbWlseV9uYW1lIjoiTGFzdCIsImVtYWlsIjoibmV3dXNlckBleGFtcGxlLmNvbSJ9.RuQQMUDPh34zbdIao_65DsghGhiCcS9xMDmO9edSQvQVnqVvnQBb_n02CwWoG7W7nquNxavyWV_1CVAW1FjF7EY0EfJFo7f8BJSYjHeRHYFF6M9iqj4mvTZWL2XlFWUyOqLMjjra7CD3cb-k1DPGvxzWm5a-2o5ZF5PDlRgYVb-nlb9JBbwv1gtnYFWRAcZbieb2N6tsVpk-UL6gZTbpeLpzk9A3oOfuPAXpReyA3uBFSs7mGvvRyqywG3bP-s2LHh5YDsVUuUha2fz7RL-RbXzuo5_PuLJQhZkPmeo5IR6HpgKiKeY2OJTKxCJJYavYIdPTtI4JhLwvxsU7zjQwfg",
+    "expires_in": 300,
+    "refresh_expires_in": 1800,
+    "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIwY2NmMzhjMi04OWNhLTQ2MmUtYTBlMy0wMDI4M2Q5NTNiMmQifQ.eyJleHAiOjE3MjIzNzE3OTYsImlhdCI6MTcyMjM2OTk5NiwianRpIjoiZDI1OTJmMjEtYjQ5Zi00YWI0LWI1MDAtM2MxYjNjMzJhODY0IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9tYXgtbGl2ZS10ZXN0IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9tYXgtbGl2ZS10ZXN0Iiwic3ViIjoiZDA3MDIxZTktMWFkNC00NmVlLWE0ZmMtMGM1YzAwODQ0Yzk0IiwidHlwIjoiUmVmcmVzaCIsImF6cCI6Im1heC1saXZlLXdlYiIsInNpZCI6ImY0ODYwNjQzLTJlYWEtNGFhZi1iNjQ2LTZjNmE0MDcyOWJjNiIsInNjb3BlIjoicm9sZXMgZW1haWwgYmFzaWMgcHJvZmlsZSBhY3Igd2ViLW9yaWdpbnMifQ.hBjTE0fCvdLLWNc8dRMDsiAPp7JZyqegnyyO5AdO6ByZcDC0RLB9lcntEaLKNpiSCfdmnvOTanOooJ7zhRPFxw",
+    "token_type": "Bearer",
+    "not-before-policy": 0,
+    "session_state": "f4860643-2eaa-4aaf-b646-6c6a40729bc6",
+    "scope": "email profile"
+  }
+  ```
+You can now use the access_token to authenticate API requests.
