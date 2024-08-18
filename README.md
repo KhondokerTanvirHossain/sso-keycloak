@@ -391,6 +391,10 @@ In the response, you will get a 302 Found status with a `Location` header contai
 
 ![alt text](assets/image-2.png)
 
+Please note that the auto riderection must be off. You can do it from request setting in postman or in curl add `-L`
+
+![alt text](assets/riderctoff.png)
+
 ### 4. Exchange Authorization Code for Tokens
 Use the authorization code to request tokens.
 
