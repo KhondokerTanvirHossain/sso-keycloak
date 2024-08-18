@@ -349,3 +349,97 @@ Use the following `curl` command to exchange the authorization code for tokens:
   }
   ```
 You can now use the access_token to authenticate API requests.
+
+## Keycloak Login via cURL
+
+This guide explains how to log in to Keycloak using cURL commands. The process involves multiple steps including obtaining an authorization code, authenticating the user, and finally retrieving the access token.
+
+## Steps
+
+### 1. Get the AUthentication web page
+
+First, initiate the authorization request to get the authorization code.
+
+```bash
+curl --location 'https://sso-dev.themaxlive.com/realms/max-live/protocol/openid-connect/auth?client_id=max-live-web&response_type=code&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fabcd&code_challenge_method=S256&code_challenge=m6kDn1BQX2MoNYdojvsOq0UWi4eK3qJ70FkYKRxNxiU'
+```
+
+### 2. Authenticate User
+
+Extract the form action URL from the response HTML and use it to authenticate the user.
+
+The url will be found in a div `<div id="kc-form-wrapper">` and then a form `<form id="kc-form-login"` and then in the `action` tag.
+
+![alt text](assets/image.png)
+
+Please note that You must add in the request header `Cookie` and in this `Cookie` there must be `AUTH_SESSION_ID`, `KEYCLOAK_IDENTITY`, `KEYCLOAK_IDENTITY_LEGACY`, and `KEYCLOAK_SESSION` which are added in one string via `;`. The values will be found from the first API response header under the keys `Set-Cookie`.
+It is true for every API in this process.
+
+![alt text](assets/image-1.png)
+
+```bash
+curl --location 'https://sso-dev.themaxlive.com/realms/max-live/login-actions/authenticate?session_code=zZiny5ag_f3TipdjS6QpkUARTyg8evq0HZ-pBGDJdFk&amp%3Bexecution=bd5b8ec8-9f92-487d-85fa-e0bef933fe8c&amp%3Bclient_id=max-live-web&amp%3Btab_id=LzgLK3DL_M0&amp%3Bclient_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hYmNkIiwicnQiOiJjb2RlIn0' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Cookie: AUTH_SESSION_ID=12fea1b2-5b34-44fb-b0dc-ad55b104695d; AUTH_SESSION_ID_LEGACY=12fea1b2-5b34-44fb-b0dc-ad55b104695d; KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..klx5Ff2ZdrLUAl6YBtogtA.Dk7mVeFNkPJlDQv0uGKm0ivQ3UFyHXvPsePc0ObXGQi1W28uDakydiS_kjXPK7wOFQoGwZGF8SlQ3i6FF15TPauK0NB5HRinnkl9cRNW5JI_aOiwbCf-K5s7s83JDnOfNg32o6xR-ZkhvzXb0huJgTOmmugbPkrNPqkrmqcNfnfON5P_JAf3R1HVXlv1Nv__K1wVbDj9Yozh9T-haZtN6FeROF2d2F7-GLN08bce9E1gWsn8Dgg0oOjowLKLYJp0htYwDer4fTz5riusDmySMJF8M5sowbFff3XPGo_5OzAZl5qxLMkwSWS54BX_Z8DJoAVz5amVD-a8x3AnL2HHcANfhR-mVA_JquMsiysWfj2bNwbBUm8I9coRdsMbmtcUL-T6obPgEvh_du_pJZxecV8TMCu2gAHxmObLuru0Keh9FEP3-Qu9d-T4KoHo3EGjo93oDcOIY7vBHeADJFrW84o312OA6FIHJ3-qvpVRRi1PJo6-5JxfncrbqtY5IvDUgdBqFWa1wW9OOVRS-pkCQoLlUtJMkGZR51T5fVYVenBcijHGgXfeXZZi2NH3VazXb_hnIY50O4H_MaBuQWmwETwu1wl4LXBga59ODZWh9-4xFs5v13APjazFNMTmu825vjXlQ-u8j03cfYeudrTDRWHZHXCHAf6x15MW6zO3GT7i6E1xu_buORmqO9-zi2v8VhWmz1Hd9tt-ALmyuLuwuyidjFFQ6egWULkOOuPzWbUH6vgJuHFb7uAfsDF3NCkOp2-_I2UIBlPoyB2E2GpGQyMVVMKUL4s74M-spTkGnBLE2RSOMEi7OOZ-foAg8xeNH0rbSjIHlDd1Y_6GmIHgbp7ibUopAABthnU2KAbcNXY.vQdZYWUpnr-G8Of8-7p8Qw' \
+--data-urlencode 'username=tanviruser' \
+--data-urlencode 'password=asdf1234'
+```
+
+### 3. Retrieve Authorization Code from Redirect
+
+In the response, you will get a 302 Found status with a `Location` header containing the authorization code.
+
+![alt text](assets/image-2.png)
+
+### 4. Exchange Authorization Code for Tokens
+Use the authorization code to request tokens.
+
+```bash
+curl --location 'https://sso-dev.themaxlive.com/realms/max-live/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Cookie: AUTH_SESSION_ID=12fea1b2-5b34-44fb-b0dc-ad55b104695d; AUTH_SESSION_ID_LEGACY=12fea1b2-5b34-44fb-b0dc-ad55b104695d; KEYCLOAK_IDENTITY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_IDENTITY_LEGACY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_SESSION="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"; KEYCLOAK_SESSION_LEGACY="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"' \
+--data-urlencode 'grant_type=authorization_code' \
+--data-urlencode 'client_id=max-live-web' \
+--data-urlencode 'redirect_uri=http://localhost:3000/abcd' \
+--data-urlencode 'code=ab00fb51-9df5-4bcc-91ce-8462e2089012.12fea1b2-5b34-44fb-b0dc-ad55b104695d.f20509ef-c117-4f59-a906-760ec40d83cd' \
+--data-urlencode 'code_verifier=OG3Ty56oiX9102cmlXiV8Zz8HgoNj2YAbK7ylMepkflTdFag05E5NbI3nh2fQAkp8Cj6z0TiTrJY3IUaNdkriJTpL2T6_JI02SjWQL-EXa_oXHWQpivl03SqB0QhwSGz'
+```
+
+Explanation of the cURL Command
+
+* **-X POST:** Specifies the request method as POST.
+
+* **-H "Content-Type: application/x-www-form-urlencoded":** Sets the content 
+type of the request to application/x-www-form-urlencoded.
+
+* **-d "grant_type=authorization_code":** Specifies the grant type as authorization_code.
+
+* **-d "client_id=your_client_id":** Specifies the client ID.
+
+* **-d "client_secret=your_client_secret":** Specifies the client secret (if applicable).
+
+* **-d "code=your_authorization_code":** Specifies the authorization code received from the authorization server.
+* -d "redirect_uri=http://localhost:3000": Specifies the redirect URI that was used in the authorization request.
+
+### 5. Refresh Access Token
+
+Use the refresh token to obtain a new access token.
+
+```bash
+curl --location 'https://sso-dev.themaxlive.com/realms/max-live/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Cookie: AUTH_SESSION_ID=12fea1b2-5b34-44fb-b0dc-ad55b104695d; AUTH_SESSION_ID_LEGACY=12fea1b2-5b34-44fb-b0dc-ad55b104695d; KEYCLOAK_IDENTITY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_IDENTITY_LEGACY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_SESSION="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"; KEYCLOAK_SESSION_LEGACY="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"' \
+--data-urlencode 'grant_type=refresh_token' \
+--data-urlencode 'refresh_token=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjM5OTkyNzMsImlhdCI6MTcyMzk5NzQ3MywianRpIjoiMWVlMTlhYzQtMzVlMS00M2Y0LWIyOGUtNGE0YmVkNDI5MTM4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsImF1ZCI6Imh0dHBzOi8vc3NvLWRldi50aGVtYXhsaXZlLmNvbS9yZWFsbXMvbWF4LWxpdmUiLCJzdWIiOiI0MjhkZDIwOS0yOWRlLTQzNDctYTFkZS03MDY0OTkxNjdkODIiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoibWF4LWxpdmUtd2ViIiwic2lkIjoiMTJmZWExYjItNWIzNC00NGZiLWIwZGMtYWQ1NWIxMDQ2OTVkIiwic2NvcGUiOiJvcGVuaWQgd2ViLW9yaWdpbnMgZW1haWwgYWNyIHByb2ZpbGUgcm9sZXMgYmFzaWMifQ.787JvDk9yJ6gwkKuyWh6xm_sL6GQ3SbqPYcGgDEBSAn-T90nd6hcpeW2MPJtG4OMRwNo6vQj4bWjCNRQzq0dEw' \
+--data-urlencode 'client_id=max-live-web'
+```
+
+### 6. Get User Info
+
+Use the access token to obtain user information from Keycloak.
+
+```bash
+curl --location 'https://sso-dev.themaxlive.com/realms/max-live/protocol/openid-connect/userinfo' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIyS01VWWdBd0p3ZUp6TFpoZ0U3bnRqaHFIUXdHb2NYSVNGUHNCSTBqUzZFIn0.eyJleHAiOjE3MjM5OTg2NzMsImlhdCI6MTcyMzk5NzQ3MywiYXV0aF90aW1lIjoxNzIzOTk3NDEwLCJqdGkiOiJiN2ZmZjZhZS0zYmVlLTRiZjMtYjllMS1kZjE3MDRiYjE0YzgiLCJpc3MiOiJodHRwczovL3Nzby1kZXYudGhlbWF4bGl2ZS5jb20vcmVhbG1zL21heC1saXZlIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IkJlYXJlciIsImF6cCI6Im1heC1saXZlLXdlYiIsInNpZCI6IjEyZmVhMWIyLTViMzQtNDRmYi1iMGRjLWFkNTViMTA0Njk1ZCIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1tYXgtbGl2ZSIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoidGFudmlyIGNzZSIsInByZWZlcnJlZF91c2VybmFtZSI6InRhbnZpcnVzZXIiLCJnaXZlbl9uYW1lIjoidGFudmlyIiwiZmFtaWx5X25hbWUiOiJjc2UiLCJlbWFpbCI6InRhbnZpQGdtYWlsLmNvbSJ9.GJqtnFFbjCh4y59VjMwcZWDu8yZTEm9Mc2AZyk4BzjxFgtKa61Mq85e30oImCRpZgkHsl3KPhlTBuTd1jRf34AYMdoZ_LNmWbSeojJ7Zt3gSdDMmBNBdDU3Ze3BdB2rVm6IpMkw1E_8IZq7b2zX_7I3c8V2HrEWpXItj1ERmdts6a6Qmrz8X7M17jQFQXI18cv5hGuvGpkGwEYz27gqUutyAg-GB87nEgsEjO4SfhDFKoaqI0T6Hf-He2NHdhw2o96zjlYvvHrVcVEdH49LqPhqPTFxQ0QpmJbmpOB1X2PoXDE6Vk90Q_-6466FAH8K20xhCavxxzx1tfvXzcpktbg' \
+--header 'Cookie: AUTH_SESSION_ID=12fea1b2-5b34-44fb-b0dc-ad55b104695d; AUTH_SESSION_ID_LEGACY=12fea1b2-5b34-44fb-b0dc-ad55b104695d; KEYCLOAK_IDENTITY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_IDENTITY_LEGACY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_SESSION="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"; KEYCLOAK_SESSION_LEGACY="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"'
+```
