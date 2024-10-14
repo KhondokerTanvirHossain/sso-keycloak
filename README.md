@@ -352,11 +352,11 @@ You can now use the access_token to authenticate API requests.
 
 ## Keycloak Login via cURL
 
-This guide explains how to log in to Keycloak using cURL commands. The process involves multiple steps including obtaining an authorization code, authenticating the user, and finally retrieving the access token.
+This guide explains how to log in to Keycloak using cURL commands. The process involves multiple steps including obtaining an authorization How to enable anrdoid app code, authenticating the user, and finally retrieving the access token.
 
 ## Steps
 
-### 1. Get the AUthentication web page
+### 1. Get the Authentication web page
 
 First, initiate the authorization request to get the authorization code.
 
@@ -396,6 +396,7 @@ Please note that the auto riderection must be off. You can do it from request se
 ![alt text](assets/riderctoff.png)
 
 ### 4. Exchange Authorization Code for Tokens
+
 Use the authorization code to request tokens.
 
 ```bash
@@ -447,3 +448,70 @@ curl --location 'https://sso-dev.themaxlive.com/realms/max-live/protocol/openid-
 --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIyS01VWWdBd0p3ZUp6TFpoZ0U3bnRqaHFIUXdHb2NYSVNGUHNCSTBqUzZFIn0.eyJleHAiOjE3MjM5OTg2NzMsImlhdCI6MTcyMzk5NzQ3MywiYXV0aF90aW1lIjoxNzIzOTk3NDEwLCJqdGkiOiJiN2ZmZjZhZS0zYmVlLTRiZjMtYjllMS1kZjE3MDRiYjE0YzgiLCJpc3MiOiJodHRwczovL3Nzby1kZXYudGhlbWF4bGl2ZS5jb20vcmVhbG1zL21heC1saXZlIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IkJlYXJlciIsImF6cCI6Im1heC1saXZlLXdlYiIsInNpZCI6IjEyZmVhMWIyLTViMzQtNDRmYi1iMGRjLWFkNTViMTA0Njk1ZCIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1tYXgtbGl2ZSIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoidGFudmlyIGNzZSIsInByZWZlcnJlZF91c2VybmFtZSI6InRhbnZpcnVzZXIiLCJnaXZlbl9uYW1lIjoidGFudmlyIiwiZmFtaWx5X25hbWUiOiJjc2UiLCJlbWFpbCI6InRhbnZpQGdtYWlsLmNvbSJ9.GJqtnFFbjCh4y59VjMwcZWDu8yZTEm9Mc2AZyk4BzjxFgtKa61Mq85e30oImCRpZgkHsl3KPhlTBuTd1jRf34AYMdoZ_LNmWbSeojJ7Zt3gSdDMmBNBdDU3Ze3BdB2rVm6IpMkw1E_8IZq7b2zX_7I3c8V2HrEWpXItj1ERmdts6a6Qmrz8X7M17jQFQXI18cv5hGuvGpkGwEYz27gqUutyAg-GB87nEgsEjO4SfhDFKoaqI0T6Hf-He2NHdhw2o96zjlYvvHrVcVEdH49LqPhqPTFxQ0QpmJbmpOB1X2PoXDE6Vk90Q_-6466FAH8K20xhCavxxzx1tfvXzcpktbg' \
 --header 'Cookie: AUTH_SESSION_ID=12fea1b2-5b34-44fb-b0dc-ad55b104695d; AUTH_SESSION_ID_LEGACY=12fea1b2-5b34-44fb-b0dc-ad55b104695d; KEYCLOAK_IDENTITY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_IDENTITY_LEGACY=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5MWY5ZjlkMi1iZjA0LTQ3ZjUtOGY4Mi01NWY0ZGEwMmE4MzEifQ.eyJleHAiOjE3MjQwMzM0MTAsImlhdCI6MTcyMzk5NzQxMCwianRpIjoiOTBhZmY4ZTUtNTYxOS00ODU0LWJiNDMtZTk2NmViMGQzYzc4IiwiaXNzIjoiaHR0cHM6Ly9zc28tZGV2LnRoZW1heGxpdmUuY29tL3JlYWxtcy9tYXgtbGl2ZSIsInN1YiI6IjQyOGRkMjA5LTI5ZGUtNDM0Ny1hMWRlLTcwNjQ5OTE2N2Q4MiIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiIxMmZlYTFiMi01YjM0LTQ0ZmItYjBkYy1hZDU1YjEwNDY5NWQiLCJzdGF0ZV9jaGVja2VyIjoicUg1RlNHTTQtWWQ3LUx6N2RsWGtwNVdObldPQmdvM1gzYlVLczNMVV9WRSJ9.TgA4vN1nupmUTM2ON-iop49TLqZLJjKYY2v4G9xkbgb7rcYi082zYytkqylrJSsJkt2LXZ9C92fW7ynzgESLaw; KEYCLOAK_SESSION="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"; KEYCLOAK_SESSION_LEGACY="max-live/428dd209-29de-4347-a1de-706499167d82/12fea1b2-5b34-44fb-b0dc-ad55b104695d"'
 ```
+
+### How to Enable Token Exchange for Google in Keycloak
+
+Token exchange allows clients to exchange tokens for different tokens, which can be useful for integrating with external identity providers like Google. Follow these steps to enable token exchange for Google in Keycloak:
+
+run the keycloak with preview feture enabled : nohup bin/kc.sh start-dev --db postgres --db-url jdbc:postgresql://localhost:5432/keycloak --db-username developer --db-password developer --http-port=9999 --hostname https://sso.themaxlive.com --http-enabled true  --features=preview&
+
+
+#### Step 1: Configure Google Identity Provider
+
+1. **Log in to Keycloak Admin Console:**
+   - Open your browser and navigate to the Keycloak Admin Console.
+   - Log in with your admin credentials.
+
+2. **Add Google Identity Provider:**
+   - In the left-hand menu, go to `Identity Providers`.
+   - Click on `Add provider` and select `Google`.
+   - Fill in the required fields:
+     - **Client ID:** Your Google OAuth 2.0 Client ID.
+     - **Client Secret:** Your Google OAuth 2.0 Client Secret.
+     - **Redirect URI:** This should be the URL where Google will redirect users after authentication. Typically, it will be something like `https://<your-keycloak-domain>/auth/realms/<your-realm>/broker/google/endpoint`.
+    - Go to permissions tab and enabled permissions
+    ![alt text](image.png) 
+    - Click on the `token-exchange` in the scope-name under permission list
+    - You need to create this permission details but before that you need permission policiy
+    ![alt text](image-1.png)
+    - Go to Client > Client details > authorization tab > Policies sub tab and create policy
+    ![alt text](image-2.png)
+    - Select type client
+    - Select the client name
+    - Confirm and save policy
+    - Now again come to the : Clients > Client details > Permission details
+    - Then select the policy created just now
+    - Save
+
+#### Step 4: Test Token Exchange
+
+1. **Obtain an Access Token:**
+   - Use an OAuth 2.0 client (e.g., Postman) to obtain an access token from Keycloak.
+
+2. **Exchange the Token:**
+   - Use the `/protocol/openid-connect/token` endpoint to exchange the token. Here is an example cURL command:
+
+```bash
+curl --location --request POST 'https://<your-keycloak-domain>/auth/realms/<your-realm>/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:token-exchange' \
+--data-urlencode 'client_id=<your-client-id>' \
+--data-urlencode 'client_secret=<your-client-secret>' \
+--data-urlencode 'subject_token=<access-token>' \
+--data-urlencode 'subject_issuer=google'
+```
+
+3. Example :
+
+  ```bash
+  curl --location 'https://sso.themaxlive.com/realms/max-live/protocol/openid-connect/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:token-exchange' \
+  --data-urlencode 'client_id=max-live-web' \
+  --data-urlencode 'client_secret=20SsPC2Fu1gLiowq0zyFyTOr8T9HPZHC' \
+  --data-urlencode 'subject_token=ya29.a0AcM612xDXsDlG3NeoEJpCzlvRR2MKlG6-7x9weyNQKc-d2lYwcbX9iu3ioP5Tlgwp1ip_THkEYbqGpYTupM0ii6ipEzJH48goxICOCtNwLljyA8nN4bqBo4N6oIs-PruV6RVacOfBZie9uDqtg6um2lP6z051hOd_5MaCgYKAU4SARISFQHGX2MiM3sr_FtrhRq8lxTW8kXhMg0170' \
+  --data-urlencode 'subject_issuer=google' \
+  --data-urlencode 'subject_token_type=urn:ietf:params:oauth:token-type:access_token' \
+  --data-urlencode 'requested_token_type=urn:ietf:params:oauth:token-type:refresh_token' \
+  --data-urlencode 'scope=openid email profile offline_access'
+  ```
