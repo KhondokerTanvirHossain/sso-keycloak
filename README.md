@@ -515,3 +515,20 @@ curl --location --request POST 'https://<your-keycloak-domain>/auth/realms/<your
   --data-urlencode 'requested_token_type=urn:ietf:params:oauth:token-type:refresh_token' \
   --data-urlencode 'scope=openid email profile offline_access'
   ```
+
+
+  Configuring Refresh Token Lifespan in Keycloak
+To configure the refresh token lifespan in Keycloak, follow these steps:
+
+Step 1: Configure Realm Settings
+Log in to Keycloak Admin Console:
+
+Open your browser and navigate to the Keycloak Admin Console.
+Log in with your admin credentials.
+Go to Realm Settings:
+
+In the left-hand menu, go to Realm Settings.
+Configure Token Settings:
+
+Click on the Tokens tab.
+Configure the Refresh Token Lifespan and Offline Session Idle Timeout as needed.
